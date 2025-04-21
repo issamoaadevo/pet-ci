@@ -21,3 +21,17 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
+
+
+
+      - name: Start Tomcat Server
+        run: |
+          echo "Starting Tomcat..."
+          /opt/tomcat/bin/startup.sh
+          sleep 10
+
+      - name: Deploy to Tomcat
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }} \
+            -T target/*.war \
+            "${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/petclinic&update=true"
