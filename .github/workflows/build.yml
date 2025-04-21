@@ -27,7 +27,7 @@ jobs:
       - name: Start Tomcat Server
         run: |
           echo "Starting Tomcat with 'tomcat start'..."
-          tomcat start
+          systemctl start tomcat
           sleep 10
 
       - name: Deploy to Tomcat
