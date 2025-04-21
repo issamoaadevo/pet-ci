@@ -1,4 +1,4 @@
-name: Build Petclinic with Maven
+name: Build and Deploy Petclinic
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted  # Uses your self-hosted runner
+    runs-on: self-hosted  # Uses your local Fedora runner
 
     steps:
       - name: Checkout code
@@ -22,16 +22,16 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
-
-
       - name: Start Tomcat Server
         run: |
-          echo "Starting Tomcat with 'tomcat start'..."
-          systemctl start tomcat
+          echo "Starting Tomcat with 'systemctl start tomcat'..."
+          sudo /usr/bin/systemctl start tomcat
           sleep 10
 
       - name: Deploy to Tomcat
         run: |
+          echo "Deploying WAR to Tomcat..."
           curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }} \
             -T target/*.war \
             "${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/petclinic&update=true"
+
