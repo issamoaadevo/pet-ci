@@ -6,11 +6,11 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: self-hosted  # Uses your local Fedora runner
+  build-and-deploy:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Java
@@ -22,16 +22,24 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
+      - name: List WAR files (debug)
+        run: ls -lh target/
+
       - name: Start Tomcat Server
         run: |
-          echo "Starting Tomcat with 'systemctl start tomcat'..."
+          echo "Starting Tomcat..."
           sudo /usr/bin/systemctl start tomcat
           sleep 10
 
-      - name: Deploy to Tomcat
+      - name: Deploy WAR to Tomcat
         run: |
           echo "Deploying WAR to Tomcat..."
-          curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }} \
-            -T target/*.war \
-            "${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/petclinic&update=true"
+          curl -v -u "$TOMCAT_USER:$TOMCAT_PASS" \
+               -T "$WAR" \
+               "$URL"
+        env:
+          WAR: target/petclinic.war
+          URL: ${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/petclinic&update=true
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
 
